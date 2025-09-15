@@ -797,6 +797,7 @@ function initializeControllers() {
   // Initialize controllers in order of priority
   const lazyLoadingEnhancer = new LazyLoadingEnhancer();
   const accessibilityEnhancer = new AccessibilityEnhancer();
+  const passwordProtectionController = new PasswordProtectionController();
   const mobileNavigationController = new MobileNavigationController();
   const contactController = new ContactController();
   const projectCardController = new ProjectCardController();
@@ -826,6 +827,452 @@ if (document.readyState === 'loading') {
 } else {
   // DOM is already ready
   initializeWebsite();
+}
+
+// ========================================
+// PASSWORD PROTECTION SYSTEM
+// ========================================
+
+class PasswordProtectionController {
+  constructor() {
+    this.correctPassword = '3027';
+    this.sessionKey = 'portfolio_authenticated';
+    this.sessionExpiry = 24 * 60 * 60 * 1000; // 24 hours
+    this.init();
+  }
+
+  init() {
+    this.setupPasswordProtection();
+    this.setupPasswordModal();
+  }
+
+  setupPasswordProtection() {
+    // Check if this is a case study page
+    const isCaseStudy = document.body.classList.contains('case-study-page');
+    
+    if (isCaseStudy) {
+      // Check if user is already authenticated
+      if (!this.isAuthenticated()) {
+        this.showPasswordModal();
+      }
+    }
+  }
+
+  setupPasswordModal() {
+    // Create password modal HTML
+    const modalHTML = `
+      <div id="password-modal" class="password-modal" role="dialog" aria-labelledby="password-modal-title" aria-describedby="password-modal-description">
+        <div class="password-modal-overlay"></div>
+        <div class="password-modal-content">
+          <button class="password-modal-close" aria-label="Close password modal" type="button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </button>
+          <div class="password-modal-header">
+            <h2 id="password-modal-title" class="password-modal-title">Password Required</h2>
+            <p id="password-modal-description" class="password-modal-description">
+              This project is password protected. Please enter the password to continue.
+            </p>
+          </div>
+          <div class="password-modal-body">
+            <form id="password-form" class="password-form">
+              <div class="password-input-group">
+                <label for="password-input" class="password-label">Password</label>
+                <input 
+                  type="password" 
+                  id="password-input" 
+                  class="password-input" 
+                  placeholder="Enter password"
+                  autocomplete="off"
+                  required
+                >
+                <div id="password-error" class="password-error" role="alert" aria-live="polite"></div>
+              </div>
+              <div class="password-modal-actions">
+                <button type="submit" class="password-submit-btn">Access Project</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Add modal styles
+    this.addModalStyles();
+
+    // Setup form handler
+    this.setupPasswordForm();
+    
+    // Setup close button handler
+    this.setupCloseButton();
+  }
+
+  addModalStyles() {
+    const styles = `
+      <style id="password-modal-styles">
+        .password-modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 9999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.3s ease;
+        }
+
+        .password-modal.show {
+          opacity: 1;
+          visibility: visible;
+        }
+
+        .password-modal-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.8);
+          backdrop-filter: blur(4px);
+        }
+
+        .password-modal-content {
+          position: relative;
+          background: var(--color-bg, #FFFFFF);
+          border-radius: 0;
+          padding: 2rem;
+          max-width: 400px;
+          width: 90%;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+          transform: scale(0.9);
+          transition: transform 0.3s ease;
+        }
+
+        .password-modal-close {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          background: none;
+          border: none;
+          padding: 0.75rem;
+          cursor: pointer;
+          color: var(--color-muted, #475569);
+          transition: color 0.2s ease;
+          z-index: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 2.5rem;
+          height: 2.5rem;
+        }
+
+        .password-modal-close:hover {
+          color: var(--color-fg, #0F172A);
+        }
+
+        .password-modal-close:focus {
+          outline: 2px solid var(--color-primary, #3B82F6);
+          outline-offset: 2px;
+        }
+
+        .password-modal.show .password-modal-content {
+          transform: scale(1);
+        }
+
+        .password-modal-header {
+          text-align: center;
+          margin-bottom: 1.5rem;
+        }
+
+        .password-modal-title {
+          font: 700 1.5rem/1.2 var(--font-sans, "Inter", sans-serif);
+          color: var(--color-fg, #0F172A);
+          margin-bottom: 0.5rem;
+        }
+
+        .password-modal-description {
+          font: 400 0.875rem/1.4 var(--font-sans, "Inter", sans-serif);
+          color: var(--color-muted, #475569);
+          margin: 0;
+        }
+
+        .password-form {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .password-input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .password-label {
+          font: 500 0.875rem/1 var(--font-sans, "Inter", sans-serif);
+          color: var(--color-fg, #0F172A);
+        }
+
+        .password-input {
+          padding: 0.75rem 1rem;
+          border: 2px solid var(--color-border, #E2E8F0);
+          border-radius: 0;
+          font: 400 1rem/1 var(--font-sans, "Inter", sans-serif);
+          color: var(--color-fg, #0F172A);
+          background: var(--color-bg, #FFFFFF);
+          transition: border-color 0.2s ease;
+        }
+
+        .password-input:focus {
+          outline: none;
+          border-color: var(--color-primary, #3B82F6);
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .password-input.error {
+          border-color: #EF4444;
+        }
+
+        .password-error {
+          font: 400 0.75rem/1.2 var(--font-sans, "Inter", sans-serif);
+          color: #EF4444;
+          min-height: 1.2rem;
+        }
+
+        .password-submit-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: var(--space-3, 12px) var(--space-6, 24px);
+          background: var(--color-fg, #0F172A);
+          color: var(--color-bg, #FFFFFF);
+          text-decoration: none;
+          border-radius: 0;
+          font: 500 var(--text-base, 1rem)/1 var(--font-sans, "Inter", sans-serif);
+          transition: var(--transition-base, 250ms ease-in-out);
+          border: none;
+          cursor: pointer;
+          letter-spacing: var(--letter-spacing-tight, -0.03em);
+        }
+
+        .password-submit-btn:hover {
+          background: var(--color-primary-600, #2563EB);
+        }
+
+        .password-submit-btn:active {
+          transform: none;
+        }
+
+        .password-submit-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .password-modal-actions {
+          display: flex;
+          justify-content: center;
+        }
+
+
+        /* Hide main content when password modal is shown */
+        body.password-protected .main {
+          display: none;
+        }
+
+        body.password-protected .nav-header {
+          display: none;
+        }
+
+        body.password-protected .footer {
+          display: none;
+        }
+
+        @media (max-width: 480px) {
+          .password-modal-content {
+            padding: 1.5rem;
+            margin: 1rem;
+          }
+          
+        }
+      </style>
+    `;
+
+    document.head.insertAdjacentHTML('beforeend', styles);
+  }
+
+  setupPasswordForm() {
+    const form = document.getElementById('password-form');
+    const input = document.getElementById('password-input');
+    const errorDiv = document.getElementById('password-error');
+
+    if (form && input) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.handlePasswordSubmit(input.value.trim(), errorDiv);
+      });
+
+      // Clear error on input
+      input.addEventListener('input', () => {
+        this.clearError(errorDiv);
+        input.classList.remove('error');
+      });
+
+      // Focus input when modal shows
+      const modal = document.getElementById('password-modal');
+      if (modal) {
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+              if (modal.classList.contains('show')) {
+                setTimeout(() => input.focus(), 100);
+              }
+            }
+          });
+        });
+        observer.observe(modal, { attributes: true });
+      }
+    }
+  }
+
+  setupCloseButton() {
+    const closeButton = document.querySelector('.password-modal-close');
+    if (closeButton) {
+      closeButton.addEventListener('click', () => {
+        this.hidePasswordModal();
+        announceToScreenReader('Password modal closed');
+      });
+
+      // Handle keyboard navigation
+      closeButton.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          this.hidePasswordModal();
+          announceToScreenReader('Password modal closed');
+        }
+      });
+    }
+  }
+
+
+  showPasswordModal() {
+    const modal = document.getElementById('password-modal');
+    if (modal) {
+      modal.classList.add('show');
+      document.body.classList.add('password-protected');
+      
+      // Announce to screen readers
+      announceToScreenReader('Password protection modal opened');
+    }
+  }
+
+  hidePasswordModal() {
+    const modal = document.getElementById('password-modal');
+    if (modal) {
+      modal.classList.remove('show');
+      document.body.classList.remove('password-protected');
+      
+      // Announce to screen readers
+      announceToScreenReader('Password protection modal closed');
+    }
+  }
+
+  handlePasswordSubmit(password, errorDiv) {
+    const submitBtn = document.querySelector('.password-submit-btn');
+    
+    // Disable button during processing
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Checking...';
+    }
+
+    // Simulate a brief delay for better UX
+    setTimeout(() => {
+      if (password === this.correctPassword) {
+        this.authenticateUser();
+        this.hidePasswordModal();
+        announceToScreenReader('Access granted. Project content is now available.');
+      } else {
+        this.showError(errorDiv, 'Incorrect password. Please try again.');
+        const input = document.getElementById('password-input');
+        if (input) {
+          input.classList.add('error');
+          input.focus();
+          input.select();
+        }
+      }
+
+      // Re-enable button
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Access Project';
+      }
+    }, 500);
+  }
+
+  showError(errorDiv, message) {
+    if (errorDiv) {
+      errorDiv.textContent = message;
+      announceToScreenReader(message, 'assertive');
+    }
+  }
+
+  clearError(errorDiv) {
+    if (errorDiv) {
+      errorDiv.textContent = '';
+    }
+  }
+
+  authenticateUser() {
+    const authData = {
+      timestamp: Date.now(),
+      authenticated: true
+    };
+    
+    try {
+      sessionStorage.setItem(this.sessionKey, JSON.stringify(authData));
+    } catch (e) {
+      console.warn('Could not save authentication to session storage:', e);
+    }
+  }
+
+  isAuthenticated() {
+    try {
+      const authData = sessionStorage.getItem(this.sessionKey);
+      if (!authData) return false;
+
+      const parsed = JSON.parse(authData);
+      const now = Date.now();
+      
+      // Check if session is still valid
+      if (now - parsed.timestamp > this.sessionExpiry) {
+        sessionStorage.removeItem(this.sessionKey);
+        return false;
+      }
+
+      return parsed.authenticated === true;
+    } catch (e) {
+      console.warn('Could not check authentication:', e);
+      return false;
+    }
+  }
+
+  logout() {
+    try {
+      sessionStorage.removeItem(this.sessionKey);
+      announceToScreenReader('Logged out successfully');
+    } catch (e) {
+      console.warn('Could not clear authentication:', e);
+    }
+  }
 }
 
 // ========================================
