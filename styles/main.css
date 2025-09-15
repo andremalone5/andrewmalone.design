@@ -328,6 +328,24 @@ h6 {
   outline: none;
 }
 
+/* Skip links */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--color-primary-600);
+  color: var(--color-bg);
+  padding: var(--space-2) var(--space-4);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  z-index: var(--z-tooltip);
+  transition: var(--transition-fast);
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
 
 /* Live region for screen readers */
 #live-region {
@@ -439,15 +457,6 @@ select:focus-visible {
 .logo-svg {
   height: var(--space-8);
   width: auto;
-  transition: var(--transition-base);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-  display: block;
-  object-fit: contain;
-}
-
-.logo-svg:hover {
-  transform: scale(1.05);
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
 }
 
 /* Navigation Menu */
@@ -476,7 +485,7 @@ select:focus-visible {
   text-decoration: none;
   font: 500 var(--text-base)/1 var(--font-sans);
   border-radius: var(--radius-sm);
-  transition: var(--transition-base), color 0.3s ease-in-out;
+  transition: var(--transition-base);
   min-height: 44px;
   display: flex;
   align-items: center;
@@ -506,6 +515,10 @@ select:focus-visible {
   color: var(--color-fg);
 }
 
+/* Contact link text transition */
+.nav-link {
+  transition: var(--transition-base), color 0.3s ease-in-out;
+}
 
 .nav-link.copied {
   color: var(--color-primary);
@@ -609,6 +622,19 @@ select:focus-visible {
   }
 }
 
+.logo-svg {
+  width: 48px;
+  height: 48px;
+  transition: var(--transition-base);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  display: block;
+  object-fit: contain;
+}
+
+.logo-svg:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+}
 
 .hero-content {
   text-align: left;
@@ -804,11 +830,12 @@ select:focus-visible {
   height: auto;
   object-fit: contain;
   display: block;
-  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  transition: transform 0.3s ease-in-out !important;
+  will-change: transform;
 }
 
 .project-card:hover .project-image-img {
-  transform: scale(1.02);
+  transform: scale(1.08) !important;
 }
 
 .project-info {
@@ -1035,6 +1062,12 @@ select:focus-visible {
   border-top: 1px solid var(--color-border);
 }
 
+.nav-link {
+  font: 400 var(--text-base)/var(--leading-body) var(--font-sans);
+  color: var(--color-fg);
+  text-decoration: none;
+  transition: var(--transition-base);
+}
 
 
 /* Case Study Page Specific Styles */
