@@ -308,11 +308,15 @@ class MobileNavigationController {
       // Announce to screen readers
       announceToScreenReader('Navigation menu opened');
       
-      // Focus first nav link
-      const firstLink = navMenu.querySelector('.nav-link');
-      if (firstLink) {
-        firstLink.focus();
-      }
+      // Prevent any automatic focus on nav links to avoid blue border
+      setTimeout(() => {
+        const navLinks = navMenu.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+          if (document.activeElement === link) {
+            link.blur();
+          }
+        });
+      }, 0);
     }
   }
 
