@@ -148,6 +148,7 @@ class AnimationController {
 
 class ProjectCardController {
   constructor() {
+    this.targetUrl = null;
     this.init();
   }
 
@@ -184,8 +185,11 @@ class ProjectCardController {
   }
 
   handleProjectCardClick(event, card) {
+    event.preventDefault(); // Prevent default navigation
+    
     const projectTitle = card.querySelector('.project-title');
     const projectName = projectTitle ? projectTitle.textContent : 'project';
+    const projectUrl = card.getAttribute('href');
     
     // Announce to screen reader
     announceToScreenReader(`Opening ${projectName} project details`);
@@ -196,12 +200,11 @@ class ProjectCardController {
       card.style.transform = '';
     }, 150);
 
-    // In a real implementation, this would navigate to the project page
-    console.log(`Opening project: ${projectName}`);
+    // Store the target URL for after authentication
+    this.targetUrl = projectUrl;
     
-    // For demo purposes, show an alert
-    // In production, you would navigate to the actual project page
-    // window.location.href = card.getAttribute('href');
+    // Show password modal
+    this.showPasswordModalForProject();
   }
 
   handleCardHover(card, isHovering) {
@@ -212,6 +215,45 @@ class ProjectCardController {
       } else {
         image.style.transform = 'scale(1)';
       }
+    }
+  }
+
+  showPasswordModalForProject() {
+    // Check if user is already authenticated
+    if (this.isAuthenticated()) {
+      // User is already authenticated, navigate directly
+      window.location.href = this.targetUrl;
+      return;
+    }
+
+    // Show password modal
+    const modal = document.getElementById('password-modal');
+    if (modal) {
+      modal.classList.add('show');
+      announceToScreenReader('Password protection modal opened');
+    } else {
+      console.error('Password modal not found');
+    }
+  }
+
+  isAuthenticated() {
+    try {
+      const authData = sessionStorage.getItem('portfolio_authenticated');
+      if (!authData) return false;
+
+      const parsed = JSON.parse(authData);
+      const now = Date.now();
+      
+      // Check if session is still valid (24 hours)
+      if (now - parsed.timestamp > 24 * 60 * 60 * 1000) {
+        sessionStorage.removeItem('portfolio_authenticated');
+        return false;
+      }
+
+      return parsed.authenticated === true;
+    } catch (e) {
+      console.warn('Could not check authentication:', e);
+      return false;
     }
   }
 }
@@ -797,10 +839,18 @@ function initializeControllers() {
   // Initialize controllers in order of priority
   const lazyLoadingEnhancer = new LazyLoadingEnhancer();
   const accessibilityEnhancer = new AccessibilityEnhancer();
+  
+  console.log('Initializing password protection controller...');
   const passwordProtectionController = new PasswordProtectionController();
+  console.log('Password protection controller initialized:', passwordProtectionController);
+  
   const mobileNavigationController = new MobileNavigationController();
   const contactController = new ContactController();
   const projectCardController = new ProjectCardController();
+  
+  // Make project card controller globally accessible
+  window.projectCardController = projectCardController;
+  
   const linkedInButtonController = new LinkedInButtonController();
   const animationController = new AnimationController();
   const performanceMonitor = new PerformanceMonitor();
@@ -822,6 +872,8 @@ function initializeControllers() {
 // ========================================
 
 // Initialize when DOM is ready
+console.log('Main.js script loaded successfully');
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initializeWebsite);
 } else {
@@ -842,23 +894,31 @@ class PasswordProtectionController {
   }
 
   init() {
-    this.setupPasswordProtection();
     this.setupPasswordModal();
+    this.setupPasswordProtection();
   }
 
   setupPasswordProtection() {
     // Check if this is a case study page
     const isCaseStudy = document.body.classList.contains('case-study-page');
     
+    console.log('Password protection setup:', { isCaseStudy, authenticated: this.isAuthenticated() });
+    
     if (isCaseStudy) {
       // Check if user is already authenticated
       if (!this.isAuthenticated()) {
+        console.log('Showing password modal');
         this.showPasswordModal();
+      } else {
+        console.log('User already authenticated');
       }
+    } else {
+      console.log('Not a case study page - modal available for project cards');
     }
   }
 
   setupPasswordModal() {
+    console.log('Setting up password modal...');
     // Create password modal HTML
     const modalHTML = `
       <div id="password-modal" class="password-modal" role="dialog" aria-labelledby="password-modal-title" aria-describedby="password-modal-description">
@@ -876,30 +936,34 @@ class PasswordProtectionController {
             </p>
           </div>
           <div class="password-modal-body">
-            <form id="password-form" class="password-form">
+            <div id="password-form" class="password-form">
               <div class="password-input-group">
                 <label for="password-input" class="password-label">Password</label>
                 <input 
-                  type="password" 
+                  type="text" 
                   id="password-input" 
                   class="password-input" 
                   placeholder="Enter password"
                   autocomplete="off"
+                  data-form-type="other"
+                  data-lpignore="true"
                   required
                 >
                 <div id="password-error" class="password-error" role="alert" aria-live="polite"></div>
               </div>
               <div class="password-modal-actions">
-                <button type="submit" class="password-submit-btn">Access Project</button>
+                <button type="button" class="password-submit-btn">Access Project</button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
     `;
 
     // Add modal to page
+    console.log('Adding modal HTML to page...');
     document.body.insertAdjacentHTML('beforeend', modalHTML);
+    console.log('Modal HTML added. Checking if element exists:', document.getElementById('password-modal'));
 
     // Add modal styles
     this.addModalStyles();
@@ -1029,6 +1093,13 @@ class PasswordProtectionController {
           color: var(--color-fg, #0F172A);
           background: var(--color-bg, #FFFFFF);
           transition: border-color 0.2s ease;
+          font-family: monospace;
+          letter-spacing: 0.1em;
+        }
+
+        .password-input::placeholder {
+          font-family: var(--font-sans, "Inter", sans-serif);
+          letter-spacing: normal;
         }
 
         .password-input:focus {
@@ -1083,18 +1154,6 @@ class PasswordProtectionController {
         }
 
 
-        /* Hide main content when password modal is shown */
-        body.password-protected .main {
-          display: none;
-        }
-
-        body.password-protected .nav-header {
-          display: none;
-        }
-
-        body.password-protected .footer {
-          display: none;
-        }
 
         @media (max-width: 480px) {
           .password-modal-content {
@@ -1112,18 +1171,36 @@ class PasswordProtectionController {
   setupPasswordForm() {
     const form = document.getElementById('password-form');
     const input = document.getElementById('password-input');
+    const button = document.querySelector('.password-submit-btn');
     const errorDiv = document.getElementById('password-error');
 
-    if (form && input) {
-      form.addEventListener('submit', (e) => {
+    if (form && input && button) {
+      // Handle button click instead of form submission
+      button.addEventListener('click', (e) => {
         e.preventDefault();
-        this.handlePasswordSubmit(input.value.trim(), errorDiv);
+        this.handlePasswordSubmit(this.getActualPassword(input), errorDiv);
       });
 
-      // Clear error on input
-      input.addEventListener('input', () => {
+      // Handle Enter key on input
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.handlePasswordSubmit(this.getActualPassword(input), errorDiv);
+        }
+      });
+
+      // Clear error on input and handle password masking
+      input.addEventListener('input', (e) => {
         this.clearError(errorDiv);
         input.classList.remove('error');
+        this.maskPasswordInput(e.target);
+      });
+
+      // Handle backspace and other special keys
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+          this.handlePasswordBackspace(e.target, e);
+        }
       });
 
       // Focus input when modal shows
@@ -1164,13 +1241,17 @@ class PasswordProtectionController {
 
 
   showPasswordModal() {
+    console.log('showPasswordModal called');
     const modal = document.getElementById('password-modal');
+    console.log('Modal element:', modal);
     if (modal) {
       modal.classList.add('show');
-      document.body.classList.add('password-protected');
+      console.log('Modal shown successfully');
       
       // Announce to screen readers
       announceToScreenReader('Password protection modal opened');
+    } else {
+      console.error('Password modal element not found');
     }
   }
 
@@ -1178,15 +1259,30 @@ class PasswordProtectionController {
     const modal = document.getElementById('password-modal');
     if (modal) {
       modal.classList.remove('show');
-      document.body.classList.remove('password-protected');
+      
+      // Reset modal state
+      this.resetPasswordModal();
       
       // Announce to screen readers
       announceToScreenReader('Password protection modal closed');
+      
+      // Check if we're on homepage or case study page
+      const isCaseStudy = document.body.classList.contains('case-study-page');
+      if (isCaseStudy) {
+        // On case study page, hide content and redirect to homepage
+        this.hidePageContent();
+        this.redirectToHomepage();
+      }
+      // On homepage, just close the modal (user stays on homepage)
     }
   }
 
   handlePasswordSubmit(password, errorDiv) {
     const submitBtn = document.querySelector('.password-submit-btn');
+    const input = document.getElementById('password-input');
+    
+    // Get the actual password value (not the masked dots)
+    const actualPassword = this.getActualPassword(input);
     
     // Disable button during processing
     if (submitBtn) {
@@ -1196,13 +1292,23 @@ class PasswordProtectionController {
 
     // Simulate a brief delay for better UX
     setTimeout(() => {
-      if (password === this.correctPassword) {
+      console.log('Password validation:', { actualPassword, correctPassword: this.correctPassword, match: actualPassword === this.correctPassword });
+      
+      if (actualPassword === this.correctPassword) {
         this.authenticateUser();
         this.hidePasswordModal();
-        announceToScreenReader('Access granted. Project content is now available.');
+        
+        // Check if we're on homepage (project card click) or case study page
+        const isCaseStudy = document.body.classList.contains('case-study-page');
+        if (isCaseStudy) {
+          this.showPageContent();
+          announceToScreenReader('Access granted. Project content is now available.');
+        } else {
+          // We're on homepage, navigate to the target project
+          this.navigateToProject();
+        }
       } else {
         this.showError(errorDiv, 'Incorrect password. Please try again.');
-        const input = document.getElementById('password-input');
         if (input) {
           input.classList.add('error');
           input.focus();
@@ -1228,6 +1334,71 @@ class PasswordProtectionController {
   clearError(errorDiv) {
     if (errorDiv) {
       errorDiv.textContent = '';
+    }
+  }
+
+  maskPasswordInput(input) {
+    // Get the current actual value
+    const currentActual = input.getAttribute('data-actual-value') || '';
+    
+    // Get the new input value
+    const newValue = input.value;
+    
+    // If the new value is longer than current actual, add the new characters
+    if (newValue.length > currentActual.length) {
+      const newChars = newValue.slice(currentActual.length);
+      const updatedActual = currentActual + newChars;
+      input.setAttribute('data-actual-value', updatedActual);
+      input.value = '•'.repeat(updatedActual.length);
+    } else if (newValue.length < currentActual.length) {
+      // Handle deletion
+      const updatedActual = currentActual.slice(0, newValue.length);
+      input.setAttribute('data-actual-value', updatedActual);
+      input.value = '•'.repeat(updatedActual.length);
+    }
+  }
+
+  handlePasswordBackspace(input, event) {
+    const actualValue = input.getAttribute('data-actual-value') || '';
+    
+    if (event.key === 'Backspace') {
+      // Remove last character from actual value
+      const newActualValue = actualValue.slice(0, -1);
+      input.setAttribute('data-actual-value', newActualValue);
+      
+      // Update display
+      input.value = '•'.repeat(newActualValue.length);
+    } else if (event.key === 'Delete') {
+      // For delete key, we'll handle it in the input event
+      return;
+    }
+  }
+
+  getActualPassword(input) {
+    return input.getAttribute('data-actual-value') || '';
+  }
+
+  resetPasswordModal() {
+    const input = document.getElementById('password-input');
+    const errorDiv = document.getElementById('password-error');
+    const submitBtn = document.querySelector('.password-submit-btn');
+    
+    if (input) {
+      // Clear the input field and reset the actual value
+      input.value = '';
+      input.removeAttribute('data-actual-value');
+      input.classList.remove('error');
+    }
+    
+    if (errorDiv) {
+      // Clear any error messages
+      errorDiv.textContent = '';
+    }
+    
+    if (submitBtn) {
+      // Reset button state
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Access Project';
     }
   }
 
@@ -1272,6 +1443,45 @@ class PasswordProtectionController {
     } catch (e) {
       console.warn('Could not clear authentication:', e);
     }
+  }
+
+  hidePageContent() {
+    // Hide all main content immediately
+    const mainContent = document.querySelector('.main');
+    const navHeader = document.querySelector('.nav-header');
+    const footer = document.querySelector('.footer');
+    
+    if (mainContent) mainContent.style.display = 'none';
+    if (navHeader) navHeader.style.display = 'none';
+    if (footer) footer.style.display = 'none';
+  }
+
+  showPageContent() {
+    // Show all main content
+    const mainContent = document.querySelector('.main');
+    const navHeader = document.querySelector('.nav-header');
+    const footer = document.querySelector('.footer');
+    
+    if (mainContent) mainContent.style.display = '';
+    if (navHeader) navHeader.style.display = '';
+    if (footer) footer.style.display = '';
+  }
+
+  navigateToProject() {
+    // Get the target URL from the project card controller
+    const projectCardController = window.projectCardController;
+    if (projectCardController && projectCardController.targetUrl) {
+      setTimeout(() => {
+        window.location.href = projectCardController.targetUrl;
+      }, 300);
+    }
+  }
+
+  redirectToHomepage() {
+    // Small delay to allow modal to close smoothly
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 300);
   }
 }
 
