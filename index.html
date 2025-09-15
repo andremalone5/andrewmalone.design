@@ -3,31 +3,462 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Andrew Malone | Product Designer</title>
-    <link rel="stylesheet" href="styles/main.css">
+    <meta name="description" content="Andrew Malone - Senior Product Designer at Back Market">
+    <meta name="author" content="Andrew Malone">
+    <meta name="theme-color" content="#3B82F6">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Andrew Malone - Product Designer">
+    <meta property="og:description" content="Senior Product Designer at Back Market. Specializing in healthcare and marketplace design with a focus on user-centered solutions.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://andrewmalone.design/">
+    <meta property="og:image" content="https://andrewmalone.design/assets/icons/AndrewMalone_Logo.svg">
+    <meta property="og:site_name" content="Andrew Malone - Product Designer">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Andrew Malone - Product Designer">
+    <meta name="twitter:description" content="Senior Product Designer at Back Market. Specializing in healthcare and marketplace design with a focus on user-centered solutions.">
+    <meta name="twitter:image" content="https://andrewmalone.design/assets/icons/AndrewMalone_Logo.svg">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/assets/icons/favicon/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/favicon/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/assets/icons/favicon/android-chrome-512x512.png">
+    
+    <!-- Preconnect to external domains for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Critical CSS (Above-the-fold) -->
+    <style>
+      :root {
+        --color-bg: #FFFFFF;
+        --color-bg-secondary: #F5F5F5;
+        --color-fg: #0F172A;
+        --color-muted: #475569;
+        --color-border: #E2E8F0;
+        --color-primary: #3B82F6;
+        --color-primary-600: #2563EB;
+        --font-sans: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        --text-hero: 4rem;
+        --text-page: 2.5rem;
+        --text-base: 1rem;
+        --text-heading: 1.5rem;
+        --leading-hero: 1.1;
+        --leading-page: 1.2;
+        --leading-body: 1.5;
+        --space-2: 8px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-6: 24px;
+        --space-8: 32px;
+        --space-10: 40px;
+        --space-12: 48px;
+        --space-16: 64px;
+        --space-20: 80px;
+        --page-background: #EDECE8;
+        --transition-base: 250ms ease-in-out;
+        --letter-spacing-tight: -0.03em;
+      }
+      
+      *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      
+      html {
+        font-size: 16px;
+        scroll-behavior: smooth;
+        -webkit-text-size-adjust: 100%;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      body {
+        font: 400 var(--text-base)/var(--leading-body) var(--font-sans);
+        color: var(--color-fg);
+        background-color: var(--page-background);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      h1 { 
+        font: 700 var(--text-hero)/var(--leading-hero) var(--font-sans); 
+        color: var(--color-fg);
+      }
+      
+      .nav-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background: var(--page-background);
+        height: calc(var(--space-16) + var(--space-8));
+        padding-top: var(--space-6);
+      }
+      
+      .nav-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 var(--space-12);
+        height: 100%;
+      }
+      
+      .nav-logo {
+        flex-shrink: 0;
+      }
+      
+      .logo-link {
+        display: inline-block;
+        text-decoration: none;
+        transition: var(--transition-base);
+      }
+      
+      .logo-svg {
+        height: var(--space-8);
+        width: auto;
+      }
+      
+      .nav-menu {
+        display: flex;
+        align-items: center;
+      }
+      
+      .nav-list {
+        display: flex;
+        align-items: center;
+        gap: var(--space-6);
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      
+      .nav-link {
+        display: inline-block;
+        padding: var(--space-2) var(--space-3);
+        color: var(--color-fg);
+        text-decoration: none;
+        font: 500 var(--text-base)/1 var(--font-sans);
+        border-radius: 6px;
+        transition: var(--transition-base);
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        position: relative;
+        letter-spacing: var(--letter-spacing-tight);
+      }
+      
+      .hero-section {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding-top: calc(var(--space-16) + var(--space-8));
+        padding-bottom: var(--space-20);
+        background: var(--page-background);
+      }
+      
+      .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 var(--space-6);
+      }
+      
+      .hero-content {
+        text-align: left;
+        margin: 0;
+      }
+      
+      .hero-subhead {
+        font: 400 var(--text-page)/var(--leading-page) var(--font-sans);
+        color: var(--color-muted);
+        margin-bottom: var(--space-10);
+        letter-spacing: var(--letter-spacing-tight);
+      }
+      
+      .hero-role {
+        font: 400 var(--text-base)/var(--leading-body) var(--font-sans);
+        color: var(--color-fg);
+        margin-bottom: var(--space-10);
+        letter-spacing: var(--letter-spacing-tight);
+      }
+      
+      .company-link {
+        color: var(--color-fg);
+        text-decoration: none;
+        font-weight: 400;
+        transition: var(--transition-base);
+        position: relative;
+      }
+      
+      .hero-cta {
+        display: flex;
+        align-items: center;
+        gap: var(--space-8);
+        margin-top: var(--space-6);
+        flex-wrap: wrap;
+      }
+      
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-3) var(--space-6);
+        background: var(--color-fg);
+        color: var(--color-bg);
+        text-decoration: none;
+        border-radius: 0;
+        font: 500 var(--text-base)/1 var(--font-sans);
+        transition: var(--transition-base);
+        border: none;
+        cursor: pointer;
+        letter-spacing: var(--letter-spacing-tight);
+      }
+      
+      .cta-link {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        color: var(--color-fg);
+        text-decoration: none;
+        font: 400 var(--text-base)/1 var(--font-sans);
+        transition: var(--transition-base);
+        position: relative;
+        letter-spacing: var(--letter-spacing-tight);
+      }
+      
+      .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 6px;
+        background: var(--color-primary-600);
+        color: var(--color-bg);
+        padding: var(--space-2) var(--space-4);
+        text-decoration: none;
+        border-radius: 10px;
+        z-index: 1070;
+        transition: 150ms ease-in-out;
+      }
+      
+      .skip-link:focus {
+        top: 6px;
+      }
+      
+      @media (min-width: 768px) {
+        .container {
+          padding: 0 var(--space-8);
+        }
+      }
+      
+      @media (max-width: 1024px) {
+        .nav-menu {
+          display: none;
+        }
+      }
+      
+      .contact-section {
+        margin-bottom: var(--space-16);
+        padding: var(--space-16) 0;
+        text-align: center;
+      }
+      
+      .contact-content {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      
+      .contact-text {
+        font: 400 var(--text-base)/var(--leading-body) var(--font-sans);
+        color: var(--color-fg);
+        margin-bottom: var(--space-8);
+      }
+      
+      .contact-cta {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-4);
+      }
+      
+      .contact-link {
+        min-width: 120px;
+      }
+      
+      .contact-link.copied {
+        color: var(--color-primary);
+        outline: none !important;
+        box-shadow: none !important;
+      }
+      
+      .contact-note {
+        font: 400 var(--text-small)/var(--leading-small) var(--font-sans);
+        color: var(--color-muted);
+        margin: 0;
+        font-style: italic;
+      }
+    </style>
+    
+    <!-- Non-critical CSS (Below-the-fold) -->
+    <link rel="stylesheet" href="styles/main.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="styles/main.css"></noscript>
+    
+    <title>Andrew Malone - Product Designer</title>
 </head>
 <body>
-    <header class="site-header">
-        <div class="logo">
-            <img src="icons/logo.svg" alt="Logo" width="48" height="48" />
+    <!-- Skip links for keyboard navigation -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <a href="#work-title" class="skip-link">Skip to work section</a>
+    
+    <!-- Navigation Header -->
+    <header class="nav-header" role="banner">
+        <div class="nav-container">
+            <!-- Logo -->
+            <div class="nav-logo">
+                <a href="/" class="logo-link">
+                    <img src="assets/icons/AndrewMalone_Logo.svg" 
+                         alt="Andrew Malone logo" 
+                         class="logo-svg">
+                </a>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="nav-menu" role="navigation" aria-label="Main navigation">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="#work-title" class="nav-link" aria-current="page">Work</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#contact" class="nav-link contact-copy-link">Contact</a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
         </div>
     </header>
-    <div class="hero">
+    
+    <!-- Hero Section -->
+    <section class="hero-section">
         <div class="container">
-            <main>
-                <h1>Andrew Malone</h1>
-                <h2>A Berlin-based creative focused on crafting meaningful experiences through purposeful design.</h2>
-                <p class="role">Currently <span class="bold">Senior Product Designer</span> at <a href="https://www.backmarket.de" target="_blank" rel="noopener">Back Market</a></p>
-                <div class="linkedin-btn-wrapper">
-                    <a class="linkedin-btn" href="https://www.linkedin.com/in/andrewmalonedesign/" target="_blank" rel="noopener" aria-label="Connect with Andrew Malone on LinkedIn">
-                        <span class="linkedin-icon" aria-hidden="true">
-                            <img src="icons/linkedin.svg" alt="" width="20" height="20" />
-                        </span>
-                        Say hi on LinkedIn 👋
+            <div class="hero-content">
+                <h1 class="text-hero" style="margin-bottom: var(--space-6);">Andrew Malone</h1>
+                <p class="hero-subhead text-page" style="font-size: var(--text-page); letter-spacing: -0.03em;">
+                    A Berlin-based creative focused on crafting meaningful experiences through purposeful design.
+                </p>
+                <div class="hero-role">
+                    <span class="text-base">Currently</span> <span class="text-base-strong">Senior Product Designer</span> <span class="text-base">at</span> 
+                    <a href="https://www.backmarket.com" class="company-link" target="_blank" rel="noopener noreferrer" aria-label="Back Market - opens in new tab">Back Market</a>
+                </div>
+                <div class="hero-cta">
+                    <a href="#work-title" class="btn btn-primary">View work</a>
+                    <a href="https://linkedin.com/in/andrewmalonedesign" class="cta-link" target="_blank" rel="noopener noreferrer" aria-label="Connect on LinkedIn - opens in new tab">
+                        Connect on LinkedIn
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"/>
+                        </svg>
                     </a>
                 </div>
-            </main>
+            </div>
         </div>
-    </div>
+    </section>
+    
+    <!-- Main Content -->
+    <main id="main-content" class="main" role="main">
+        <div class="container">
+            <!-- Work Section -->
+            <section class="work-section" aria-labelledby="work-title">
+                <h2 id="work-title" class="section-title">Work</h2>
+                
+                <div class="work-grid">
+                    <!-- Project Card 1: Back Office Homepage -->
+                    <a href="back-office-case-study.html" class="project-card" aria-label="View Back Office Homepage project">
+                        <div class="project-image">
+                            <picture>
+                                <source media="(min-width: 1024px)" 
+                                        srcset="assets/images/BackOfficeHomepageCover/BackOfficeHomepageCover_4x.webp 4x,
+                                                assets/images/BackOfficeHomepageCover/BackOfficeHomepageCover_3x.webp 3x,
+                                                assets/images/BackOfficeHomepageCover/BackOfficeHomepageCover_2x.webp 2x"
+                                        type="image/webp">
+                                <source media="(min-width: 768px)" 
+                                        srcset="assets/images/BackOfficeHomepageCover/BackOfficeHomepageCover_4x.webp 4x,
+                                                assets/images/BackOfficeHomepageCover/BackOfficeHomepageCover_3x.webp 3x,
+                                                assets/images/BackOfficeHomepageCover/BackOfficeHomepageCover_2x.webp 2x"
+                                        type="image/webp">
+                                <img src="assets/images/BackOfficeHomepageCover/BackOfficeHomepageCover_4x.webp" 
+                                     alt="Screenshot of Back Office Homepage redesign showing dashboard interface with data visualization and navigation elements" 
+                                     class="project-image-img" 
+                                     loading="lazy">
+                            </picture>
+                        </div>
+                        <div class="project-info">
+                            <div class="project-info-content">
+                                <div class="project-eyebrow">Back Office Homepage</div>
+                                <h3 class="project-title">Redesigning the Seller Back Office Homepage into a Mission-Control Hub</h3>
+                                <div class="project-company">Back Market</div>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <!-- Project Card 2: SoteriaMe -->
+                    <a href="soteria-case-study.html" class="project-card" aria-label="View SoteriaMe project">
+                        <div class="project-image">
+                            <picture>
+                                <source media="(min-width: 1024px)" 
+                                        srcset="assets/images/SoteriaMeCover/SoteriaMeCover_4x.webp 4x,
+                                                assets/images/SoteriaMeCover/SoteriaMeCover_3x.webp 3x,
+                                                assets/images/SoteriaMeCover/SoteriaMeCover_2x.webp 2x"
+                                        type="image/webp">
+                                <source media="(min-width: 768px)" 
+                                        srcset="assets/images/SoteriaMeCover/SoteriaMeCover_4x.webp 4x,
+                                                assets/images/SoteriaMeCover/SoteriaMeCover_3x.webp 3x,
+                                                assets/images/SoteriaMeCover/SoteriaMeCover_2x.webp 2x"
+                                        type="image/webp">
+                                <img src="assets/images/SoteriaMeCover/SoteriaMeCover_4x.webp" 
+                                     alt="Mobile app screenshots showing SoteriaMe healthcare app interface with patient dashboard and clinician communication features" 
+                                     class="project-image-img" 
+                                     loading="lazy">
+                            </picture>
+                        </div>
+                        <div class="project-info">
+                            <div class="project-info-content">
+                                <div class="project-eyebrow">SoteriaMe</div>
+                                <h3 class="project-title">Improving treatment success by bridging the gap between patients and clinicians</h3>
+                                <div class="project-company">Infocare Healthcare</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </section>
+            
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <p class="footer-text">Andrew Malone © 2024</p>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script src="scripts/main.js" defer></script>
 </body>
-</html> 
+</html>

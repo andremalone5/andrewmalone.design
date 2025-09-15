@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+# Allow all search engines to crawl the site
+# This is a portfolio website, so we want maximum visibility
+
+# Sitemap location
+Sitemap: https://andrewmalone.design/sitemap.xml
+
+# Optional: Block specific bots if needed
+# User-agent: BadBot
+# Disallow: /
+
+# Optional: Block access to specific directories
+# Disallow: /private/
+# Disallow: /admin/
